@@ -65,7 +65,6 @@
 
     reader.onloadend = async function() {
       const output = {
-        // ip: "127.0.0.1",
         duration: audioCtrl.duration,
         blob: reader.result
       };

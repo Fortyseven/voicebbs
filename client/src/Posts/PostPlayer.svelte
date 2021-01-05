@@ -2,6 +2,7 @@
   import { API_HOST } from "../config.js";
   import moment from "moment";
   import ProgressMeter from "../ui/ProgressMeter.svelte";
+  import Avatar from "../ui/Avatar.svelte";
   import Icon from "svelte-awesome";
   import { play, spinner, stop, link } from "svelte-awesome/icons";
 
@@ -9,6 +10,7 @@
   let post_data = undefined;
   let audio_element = undefined;
   let is_playing = false;
+  let avatar_png = undefined;
 
   let cur_time = 0;
 
@@ -67,6 +69,9 @@
     padding: 0.15rem 0.5rem;
     margin: 0.25em;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.25);
+    :global(avatar) {
+      margin-right: 0.5em;
+    }
     .post-player-top,
     .post-meta {
       display: flex;
@@ -135,6 +140,8 @@
           <Icon data={play} />
         {/if}
       </button>
+
+      <Avatar value={post_data.ip_hash} />
 
       <ProgressMeter
         bind:value={cur_time}
