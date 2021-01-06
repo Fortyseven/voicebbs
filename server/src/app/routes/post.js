@@ -52,7 +52,10 @@ postRouter.get("/post/:shortcode", function (req, res) {
 
             post.ip = undefined;
 
-        res.json(post);
+            res.json(post);
+        } else {
+            res.sendStatus(404);
+        }
     });
 });
 
