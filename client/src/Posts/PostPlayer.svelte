@@ -52,7 +52,6 @@
   }
 
   function onPlaybackEnded() {
-    console.log("finished");
     cur_time = post_data.duration;
     audio_element.pause();
     is_playing = false;
