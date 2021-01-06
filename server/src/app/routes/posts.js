@@ -8,7 +8,7 @@ const postsRouter = Router();
 */
 postsRouter.get("/posts", (req, res) => {
     let query = Post.find({})
-        .select("_id")
+        .select("shortcode")
         .sort([["timestamp", -1]]);
 
     var posts = query.exec((err, posts) => {

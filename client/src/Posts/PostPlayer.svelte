@@ -6,7 +6,7 @@
   import Icon from "svelte-awesome";
   import { play, spinner, stop, link } from "svelte-awesome/icons";
 
-  export let post_id;
+  export let post_shortcode;
   let post_data = undefined;
   let audio_element = undefined;
   let is_playing = false;
@@ -15,7 +15,7 @@
   let cur_time = 0;
 
   $: if (audio_element && !post_data) {
-    fetch(`https://${API_HOST}/api/v1/post/${post_id}`, {
+    fetch(`https://${API_HOST}/api/v1/post/${post_shortcode}`, {
       method: "GET"
     })
       .then(res => res.json())
@@ -24,9 +24,8 @@
       });
   }
 
-  async function loadBlob(id) {
-    console.log("loading", id);
-    await fetch(`https://${API_HOST}/api/v1/post-blob/${id}`, {
+  async function loadBlob(shortcode) {
+    await fetch(`https://${API_HOST}/api/v1/post-blob/${shortcode}`, {
       method: "GET"
     })
       .then(res => res.json())
@@ -39,7 +38,7 @@
 
   async function onPlayClick() {
     if (!audio_element.src) {
-      loadBlob(post_data._id);
+      loadBlob(post_data.shortcode);
       return;
     }
 
@@ -85,7 +84,6 @@
         margin: 0;
         margin-right: 0.5em;
       }
-
       :global(progressmeter) {
         margin-right: 0.5em;
         display: block;
@@ -132,7 +130,7 @@
   on:timeupdate={onTimeUpdate} />
 {#if post_data}
   <div class="post-player-entry">
-    <div class="post-player-top" data-post-id={post_data._id}>
+    <div class="post-player-top" data-post-shortcode={post_data.shortcode}>
       <button class="play" on:click={onPlayClick}>
         {#if is_playing}
           <Icon data={stop} />
@@ -149,7 +147,7 @@
         {is_playing} />
 
       <div class="link">
-        <a href="/post/{post_data._id}">
+        <a href="/post/{post_data.shortcode}" use:route_link>
           <Icon data={link} />
         </a>
       </div>

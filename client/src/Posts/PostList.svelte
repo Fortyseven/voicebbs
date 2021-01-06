@@ -29,6 +29,6 @@
 <fieldset>
   <legend>Latest Posts</legend>
   {#each posts as post}
-    <PostPlayer bind:post_id={post._id} />
+    <PostPlayer bind:post_shortcode={post.shortcode} />
   {/each}
 </fieldset>

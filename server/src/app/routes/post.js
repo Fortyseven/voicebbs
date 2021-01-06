@@ -1,8 +1,10 @@
 const Post = require("../models/Post");
 const { Router } = require("express");
 const crypto = require("crypto");
-
+const shortcode = require("short-unique-id");
 const postRouter = Router();
+
+var uid = new shortcode.default();
 
 /**********************************************************/
 postRouter.put("/post", function (req, res) {
@@ -17,6 +19,7 @@ postRouter.put("/post", function (req, res) {
     post.duration = req.body.duration || "??";
     post.ip = req.ip;
     post.blob = req.body.blob;
+    post.shortcode = uid();
 
     post.save((err) => {
         if (err) {
@@ -30,22 +33,24 @@ postRouter.put("/post", function (req, res) {
 });
 
 /**********************************************************/
-postRouter.get("/post/:post_id", function (req, res) {
-    let query = Post.findById(req.params.post_id).select("_id name timestamp duration ip");
+postRouter.get("/post/:shortcode", function (req, res) {
+    console.log(req.ip, `GET /post/${req.params.shortcode}`);
+    let query = Post.findOne({ shortcode: req.params.shortcode }).select("timestamp duration ip shortcode");
 
     query.exec((err, post) => {
         if (err) {
             res.json({ message: "error polling posts" });
         }
 
-        // swap the ip out for a hash of it
+        if (post) {
+            // swap the ip out for a hash of it
 
-        post._doc.ip_hash = crypto
-            .createHash("sha256") // TODO: salt this? does it matter?
-            .update(post.ip || "0.0.0.0")
-            .digest("hex");
+            post._doc.ip_hash = crypto
+                .createHash("sha256") // TODO: salt this? does it matter?
+                .update(post.ip || "0.0.0.0")
+                .digest("hex");
 
-        post.ip = undefined;
+            post.ip = undefined;
 
         res.json(post);
     });

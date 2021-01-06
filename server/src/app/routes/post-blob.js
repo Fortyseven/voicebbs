@@ -4,8 +4,8 @@ const { Router } = require("express");
 const postBlobRouter = Router();
 
 /**********************************************************/
-postBlobRouter.get("/post-blob/:post_id", function (req, res) {
-    let query = Post.findById(req.params.post_id).select("blob -_id");
+postBlobRouter.get("/post-blob/:shortcode", function (req, res) {
+    let query = Post.findOne({ shortcode: req.params.shortcode }).select("blob -_id");
 
     query.exec((err, post) => {
         if (err) {
