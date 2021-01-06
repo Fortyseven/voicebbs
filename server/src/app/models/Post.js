@@ -5,8 +5,9 @@ var PostSchema = new Schema({
     shortcode: String,
     timestamp: Schema.Types.Date,
     duration: Number,
+    play_count: { type: Number, default: 0 },
     ip: String,
-    _replyto_id: Schema.Types.ObjectId,
+    _replyto_id: { type: Schema.Types.ObjectId, default: undefined },
     blob: Object,
 });
 
