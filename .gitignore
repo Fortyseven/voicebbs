@@ -1,4 +1,6 @@
 docker/
+backups/
+.vscode/
 node_modules
 *.pem
 .DS_Store
