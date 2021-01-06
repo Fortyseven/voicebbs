@@ -6,20 +6,7 @@
 
 const express = require("express");
 const routes = require("./app/routes/");
-
-/***************************************************************/
-function mongoInit() {
-    const mongoose = require("mongoose");
-
-    const MONGO_CONN = process.env.VBBS_MONGO_CONN;
-
-    if (!MONGO_CONN) {
-        console.error("MONGO_CONN connection string not defined");
-        process.exit(1);
-    }
-
-    mongoose.connect(MONGO_CONN, { useNewUrlParser: true, useUnifiedTopology: true });
-}
+const mongo = require("./app/utils/mongo");
 
 /***************************************************************/
 function expressInit(routes) {
@@ -78,7 +65,8 @@ function expressInit(routes) {
 }
 
 const [app, port] = expressInit(routes);
-mongoInit();
+
+mongo();
 
 app.listen(port, () => {
     console.log(`- Listening on ${port}`);
