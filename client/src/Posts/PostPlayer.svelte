@@ -1,10 +1,11 @@
 <script>
   import { API_HOST } from "../config.js";
   import moment from "moment";
+  import { play, spinner, stop, link } from "svelte-awesome/icons";
+  import { link as route_link } from "svelte-routing";
   import ProgressMeter from "../ui/ProgressMeter.svelte";
   import Avatar from "../ui/Avatar.svelte";
   import Icon from "svelte-awesome";
-  import { play, spinner, stop, link } from "svelte-awesome/icons";
 
   export let post_shortcode;
   let post_data = undefined;

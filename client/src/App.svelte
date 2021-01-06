@@ -1,11 +1,9 @@
 <script>
-  import PostList from "./Posts/PostList.svelte";
-  import PostRecorder from "./Posts/PostRecorder.svelte";
+  import { Router, Link, Route } from "svelte-routing";
+  import Home from "./routes/Home.svelte";
+  import Post from "./routes/Post.svelte";
 
-  let ready = false;
-  let mediaStreamObj = undefined;
-  let updated = 1;
-  let recordVisible = false;
+  export let url = "";
 </script>
 
 <style>
@@ -16,14 +14,9 @@
   }
 </style>
 
-<main>
-  <h1>Voice BBS</h1>
-  <h4>This is a work in progress and is not ready for public use yet.</h4>
-  {#if recordVisible}
-    <PostRecorder onSaved={() => updated++} />
-  {:else}
-    <button on:click={() => (recordVisible = true)}>Record a New Post</button>
-  {/if}
-  <hr />
-  <PostList {updated} />
-</main>
+<Router {url}>
+  <main id="PageContainer">
+    <Route path="/post/:shortcode" component={Post} />
+    <Route path="/" component={Home} />
+  </main>
+</Router>
