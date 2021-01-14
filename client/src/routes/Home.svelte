@@ -9,8 +9,6 @@
 </script>
 
 <div id="Home">
-  <h1>Voice BBS</h1>
-  <h4>This is a work in progress and is not ready for public use yet.</h4>
   {#if recordVisible}
     <PostRecorder onSaved={() => updated++} />
   {:else}
