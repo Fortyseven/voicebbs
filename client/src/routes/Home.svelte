@@ -6,11 +6,16 @@
   let mediaStreamObj = undefined;
   let updated = 1;
   let recordVisible = false;
+
+  function onSaved() {
+    // a hack, for now
+    window.location.href = `/`;
+  }
 </script>
 
 <div id="Home">
   {#if recordVisible}
-    <PostRecorder onSaved={() => updated++} />
+    <PostRecorder {onSaved} />
   {:else}
     <button on:click={() => (recordVisible = true)}>Record a New Post</button>
   {/if}
