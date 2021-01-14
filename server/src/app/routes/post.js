@@ -6,7 +6,11 @@ const postRouter = Router();
 
 var uid = new shortcode.default();
 
-/**********************************************************/
+/**********************************************************
+ * Inserts a newly recorded post
+ *
+ */
+
 postRouter.put("/post", function (req, res) {
     if (!req.body.blob) {
         res.sendStatus(500);
@@ -14,17 +18,23 @@ postRouter.put("/post", function (req, res) {
         return;
     }
     var post = new Post();
-    post.name = "Unnamed Post";
     post.timestamp = new Date();
-    post.duration = req.body.duration || "??";
+    post.duration = req.body.duration;
     post.ip = req.ip;
     post.blob = req.body.blob;
     post.shortcode = uid();
+    if (req.body.reply_to) {
+        post.parent = req.body.reply_to;
+    }
 
     post.save((err) => {
         if (err) {
             res.sendStatus(err);
             return;
+        }
+        if (req.body.reply_to) {
+            // increment reply count on parent
+            Post.findOneAndUpdate({ shortcode: req.body.reply_to }, { $inc: { reply_count: 1 } }).exec();
         }
         res.json({ message: "ok" });
     });
@@ -33,26 +43,19 @@ postRouter.put("/post", function (req, res) {
 });
 
 /**********************************************************/
-postRouter.get("/post/:shortcode", function (req, res) {
+postRouter.get("/post/:shortcode?", function (req, res) {
     console.log(req.ip, `GET /post/${req.params.shortcode}`);
-    let query = Post.findOne({ shortcode: req.params.shortcode }).select("timestamp duration ip shortcode");
 
-    query.exec((err, post) => {
-        if (err) {
-            res.json({ message: "error polling posts" });
-        }
-
-        if (post) {
-            // swap the ip out for a hash of it
-
-            post._doc.ip_hash = crypto
+    Post.findOne({ shortcode: req.params.shortcode }, { _id: 0, blob: 0, __v: 0 }, (err, doc) => {
+        if (doc) {
+            doc._doc.ip_hash = crypto
                 .createHash("sha256") // TODO: salt this? does it matter?
-                .update(post.ip || "0.0.0.0")
+                .update(doc.ip || "0.0.0.0")
                 .digest("hex");
 
-            post.ip = undefined;
+            doc.ip = undefined;
 
-            res.json(post);
+            res.json(doc);
         } else {
             res.sendStatus(404);
         }

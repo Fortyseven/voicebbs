@@ -9,8 +9,10 @@ postBlobRouter.get("/post-blob/:shortcode", function (req, res) {
 
     query.exec((err, post) => {
         if (err) {
-            res.json({ message: "error pulling blob" });
+            res.statusCode(500);
+            return;
         }
+        Post.findOneAndUpdate({ shortcode: req.params.shortcode }, { $inc: { play_count: 1 } }).exec();
         res.json(post);
     });
 });

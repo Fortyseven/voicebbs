@@ -4,20 +4,22 @@
   import { onMount } from "svelte";
 
   export let updated = false;
-  let posts = [];
+  export let parent_shortcode;
 
-  $: if (updated) {
+  let replies = [];
+
+  onMount(() => {
     reload();
-  }
+  });
 
   function reload() {
-    fetch(`https://${API_HOST}/api/v1/posts`, {
+    fetch(`https://${API_HOST}/api/v1/posts/${parent_shortcode}`, {
       method: "GET"
     })
       .then(res => res.json())
       .then(data => {
-        console.log("POSTS", data);
-        posts = data;
+        // console.log("POSTS", data);
+        replies = data;
       });
   }
 </script>
@@ -31,9 +33,13 @@
   }
 </style>
 
-<fieldset>
-  <legend>Latest Posts</legend>
-  {#each posts as post}
-    <PostPlayer full={false} bind:post_shortcode={post.shortcode} />
+{#if !replies.length}
+  <p>No replies.</p>
+{:else}
+  {#each replies as reply}
+    <PostPlayer
+      full="false"
+      is_reply="true"
+      bind:post_shortcode={reply.shortcode} />
   {/each}
-</fieldset>
+{/if}

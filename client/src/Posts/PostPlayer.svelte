@@ -4,21 +4,30 @@
   import { play, spinner, stop, link } from "svelte-awesome/icons";
   import { link as route_link } from "svelte-routing";
   import ProgressMeter from "../ui/ProgressMeter.svelte";
+  import PostRepliesList from "./PostRepliesList.svelte";
+  import PostRecorderUI from "./PostRecorderUI.svelte";
   import Avatar from "../ui/Avatar.svelte";
   import Icon from "svelte-awesome";
 
+  import api from "../api";
+
   export let post_shortcode;
+  export let full = false;
+  export let is_reply = false;
+
   let post_data = undefined;
   let audio_element = undefined;
   let is_playing = false;
   let avatar_png = undefined;
+  let show_reply_controls = false;
 
   let cur_time = 0;
 
+  const NEW_POST_HOURS = 8;
+
   $: if (audio_element && !post_data) {
-    fetch(`https://${API_HOST}/api/v1/post/${post_shortcode}`, {
-      method: "GET"
-    })
+    api.post
+      .getDetails(post_shortcode)
       .then(res => res.json())
       .then(data => {
         post_data = data;
@@ -26,9 +35,8 @@
   }
 
   async function loadBlob(shortcode) {
-    await fetch(`https://${API_HOST}/api/v1/post-blob/${shortcode}`, {
-      method: "GET"
-    })
+    api.post
+      .getBlob(shortcode)
       .then(res => res.json())
       .then(data => {
         audio_element.src = data.blob;
@@ -40,6 +48,7 @@
   async function onPlayClick() {
     if (!audio_element.src) {
       loadBlob(post_data.shortcode);
+      post_data.play_count++; // we can fake this, since it'll be the same on the backend
       return;
     }
 
@@ -59,6 +68,22 @@
 
   function onTimeUpdate(v) {
     cur_time = audio_element.currentTime;
+  }
+
+  function openReplyControls() {
+    show_reply_controls = true;
+  }
+
+  function onSaved() {
+    show_reply_controls = false;
+    post_data.reply_count++;
+    window.location.href = `/post/${post_data.shortcode}`;
+  }
+
+  function isNew() {
+    return moment(post_data.timestamp)
+      .add(NEW_POST_HOURS, "hours")
+      .isAfter(Date.now());
   }
 </script>
 
@@ -103,8 +128,14 @@
     .post-meta {
       display: flex;
       margin: 0.25em 3em;
+      .new {
+        color: gold;
+        font-weight: bold;
+        text-shadow: 0 0 10px #202b38;
+      }
       .timestamp,
       .duration,
+      .plays,
       .actions {
         flex: 1 1 33%;
         align-self: center;
@@ -112,6 +143,15 @@
         button.reply {
           padding: 0.25em 1em;
           margin: unset;
+        }
+        a {
+          color: gold;
+          &:hover {
+            text-decoration: none;
+          }
+          &:visited {
+            color: unset;
+          }
         }
       }
       .timestamp {
@@ -140,26 +180,66 @@
       </button>
 
       <Avatar value={post_data.ip_hash} />
-
-      <ProgressMeter
-        bind:value={cur_time}
-        max_value={post_data.duration}
-        {is_playing} />
-
+      <span
+        style="width: 100%"
+        on:click={() => {
+          window.location.href = `/post/${post_data.shortcode}`;
+        }}>
+        <ProgressMeter
+          bind:value={cur_time}
+          max_value={post_data.duration}
+          {is_playing} />
+      </span>
       <div class="link">
-        <a href="/post/{post_data.shortcode}" use:route_link>
-          <Icon data={link} />
-        </a>
+        {#if !is_reply}
+          <a href="/post/{post_data.shortcode}" use:route_link>
+            <Icon data={link} />
+          </a>
+        {/if}
       </div>
     </div>
+
     <div class="post-meta">
-      <div class="timestamp">{moment(post_data.timestamp).fromNow()}</div>
+      <div
+        class="timestamp"
+        title={moment(post_data.timestamp).local()}
+        class:new={isNew()}>
+        {moment(post_data.timestamp).fromNow()}
+      </div>
       <div class="duration">
         {post_data.duration ? post_data.duration.toFixed(2) + 's' : '--'}
       </div>
-      <div class="actions">
-        <button class="reply" on:click={() => alert('soon')}>reply</button>
+      <div class="plays">
+        <span title="Plays">👂 {post_data.play_count}</span>
+        {#if !is_reply}|{/if}
+        <span title="Replies">
+          {#if !is_reply}
+            <a href="/post/{post_data.shortcode}" use:route_link>
+              🔥 {post_data.reply_count}
+            </a>
+          {/if}
+        </span>
       </div>
+      <div class="actions">
+        {#if !is_reply}
+          <button class="reply" on:click={() => openReplyControls()}>
+            reply
+          </button>
+        {/if}
+      </div>
+
     </div>
+
+    {#if show_reply_controls}
+      <div class="reply-controls">
+        <PostRecorderUI reply_to={post_shortcode} {onSaved} />
+      </div>
+    {/if}
   </div>
+  {#if !is_reply && full}
+    <fieldset>
+      <legend>Replies</legend>
+      <PostRepliesList parent_shortcode={post_shortcode} />
+    </fieldset>
+  {/if}
 {/if}

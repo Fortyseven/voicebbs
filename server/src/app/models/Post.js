@@ -6,8 +6,9 @@ var PostSchema = new Schema({
     timestamp: Schema.Types.Date,
     duration: Number,
     play_count: { type: Number, default: 0 },
+    reply_count: { type: Number, default: 0 },
     ip: String,
-    _replyto_id: { type: Schema.Types.ObjectId, default: undefined },
+    parent: { type: Schema.Types.String, default: undefined },
     blob: Object,
 });
 

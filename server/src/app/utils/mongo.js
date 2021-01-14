@@ -8,5 +8,5 @@ module.exports = function init() {
         process.exit(1);
     }
 
-    mongoose.connect(MONGO_CONN, { useNewUrlParser: true, useUnifiedTopology: true });
+    mongoose.connect(MONGO_CONN, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false });
 };

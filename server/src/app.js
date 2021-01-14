@@ -17,11 +17,11 @@ function expressInit(routes) {
     const crt_path = process.env.VBBS_SSL_CRT_FILE;
 
     if (!key_path || !fs.existsSync(key_path)) {
-        console.error("SSL_KEY_FILE not defined");
+        console.error("VBBS_SSL_KEY_FILE not defined");
         process.exit(1);
     }
     if (!crt_path || !fs.existsSync(crt_path)) {
-        console.error("SSL_CRT_FILE not defined");
+        console.error("VBBS_SSL_CRT_FILE not defined");
         process.exit(1);
     }
 
